@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Smart Parking System</title>
+    <img src="parking_lot.jpg" alt="My Image" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script>
+      $(document).ready(function () {
+        // Load the parking lot image
+        var img = new Image();
+        img.onload = function () {
+          // Draw the parking lot image on the canvas
+          var canvas = document.getElementById("parking-canvas");
+          canvas.width = img.width;
+          canvas.height = img.height;
+          var ctx = canvas.getContext("2d");
+          ctx.drawImage(img, 0, 0);
+
+          // Create an array to store the occupied parking spaces
+          var numSpaces = canvas.width * canvas.height;
+          var occupiedSpaces = new Array(numSpaces).fill(false);
+
+          // Update the parking space occupancy based on user bookings
+          $(".book-parking-form").submit(function (e) {
+            e.preventDefault();
+            var spaceNumber = parseInt($(this).find(".space-number").val());
+            var occupied = $(this).find(".occupied").prop("checked");
+            occupiedSpaces[spaceNumber] = occupied;
+
+            // Update the total number of occupied spaces
+            var numOccupied = occupiedSpaces.reduce(function (sum, occupied) {
+              return sum + (occupied ? 1 : 0);
+            }, 0);
+            $(".num-occupied").text(numOccupied);
+
+            // Update the parking lot image with the new occupancy
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(img, 0, 0);
+            for (var i = 0; i < numSpaces; i++) {
+              if (occupiedSpaces[i]) {
+                var x = i % canvas.width;
+                var y = Math.floor(i / canvas.width);
+                ctx.fillStyle = "rgba(255, 0, 0, 0.5)";
+                ctx.fillRect(x, y, 1, 1);
+              }
+            }
+          });
+        };
+        img.src = "parking_lot.jpg";
+      });
+    </script>
+  </head>
+  <body>
+    <h1>Smart Parking System</h1>
+    <canvas id="parking-canvas"></canvas>
+    <p>Total number of parking spaces: <span class="num-spaces"></span></p>
+    <p>Number of occupied parking spaces: <span class="num-occupied"></span></p>
+    <h2>Book a Parking Space</h2>
+    <form class="book-parking-form">
+      <label for="space-number">Space Number:</label>
+      <input type="number" name="space-number" class="space-number" required />
+      <label for="occupied">Occupied:</label>
+      <input type="checkbox" name="occupied" class="occupied" />
+      <button type="submit">Book Space</button>
+    </form>
+  </body>
+</html>
